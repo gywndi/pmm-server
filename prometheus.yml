@@ -1,197 +1,276 @@
+# Managed by pmm-managed. DO NOT EDIT.
+---
 global:
-  scrape_interval:     60s
-  scrape_timeout:      10s
-  evaluation_interval: 60s
-
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  evaluation_interval: 10s
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - 127.0.0.1:900
+    scheme: http
+    timeout: 10s
+rule_files:
+- /etc/prometheus.d/*.rule
 scrape_configs:
-  - job_name: prometheus
-    scrape_interval: 1s
-    scrape_timeout:  1s
-    metrics_path: /prometheus/metrics
-    static_configs:
-      - targets: ['localhost:9090']
-        labels:
-          instance: pmm-server
-
-
-  - job_name: grafana
-    scrape_interval: 5s
-    scrape_timeout:  4s
-    static_configs:
-      - targets: ['localhost:3000']
-        labels:
-          instance: pmm-server
-
-
-  - job_name: linux
-    scrape_interval: 1s
-    scrape_timeout:  1s
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['linux:metrics']
-
-    relabel_configs:
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
-
-    static_configs:
-      - targets: ['localhost:9100']
-        labels:
-          instance: pmm-server
-
-
-  - job_name: proxysql
-    scrape_interval: 1s
-    scrape_timeout:  1s
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['proxysql:metrics']
-
-    relabel_configs:
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
-
-
-  - job_name: mongodb
-    scrape_interval: 1s
-    scrape_timeout:  1s
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['mongodb:metrics']
-
-    relabel_configs:
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,cluster_([-\w:\.]+),.*'
-      target_label:  'cluster'
-      replacement:   '$1'
-
-
-  - job_name: mysql-hr
-    scrape_interval: 1s
-    scrape_timeout:  1s
-    metrics_path: /metrics-hr
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['mysql:metrics']
-
-    relabel_configs:
-    - target_label:  'job'
-      replacement:   'mysql'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
-
-
-  - job_name: mysql-mr
-    scrape_interval: 5s
-    scrape_timeout:  1s
-    metrics_path: /metrics-mr
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['mysql:metrics']
-
-    relabel_configs:
-    - target_label:  'job'
-      replacement:   'mysql'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
-
-
-  - job_name: mysql-lr
-    scrape_interval: 60s
-    scrape_timeout:   5s
-    metrics_path: /metrics-lr
-    basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
-
-    tls_config:
-      insecure_skip_verify: true
-
-    consul_sd_configs:
-    - server:   'localhost:8500'
-      datacenter: dc1
-      services: ['mysql:metrics']
-
-    relabel_configs:
-    - target_label:  'job'
-      replacement:   'mysql'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,alias_([-\w:\.]+),.*'
-      target_label:  'instance'
-      replacement:   '$1'
-    - source_labels: ['__meta_consul_tags']
-      regex:         '.*,scheme_https,.*'
-      target_label:  '__scheme__'
-      replacement:   'https'
+- job_name: prometheus
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /prometheus/metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:9090
+    labels:
+      instance: pmm-server
+- job_name: grafana
+  scrape_interval: 5s
+  scrape_timeout: 4s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:3000
+    labels:
+      instance: pmm-server
+- job_name: linux
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:9100
+    labels:
+      instance: pmm-server
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - linux:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+- job_name: proxysql
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /metrics
+  scheme: http
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - proxysql:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+- job_name: mongodb
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /metrics
+  scheme: http
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - mongodb:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,cluster_([-\w:\.]+),.*
+    target_label: cluster
+    replacement: $1
+    action: replace
+- job_name: mysql-hr
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /metrics-hr
+  scheme: http
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - mysql:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - separator: ;
+    regex: (.*)
+    target_label: job
+    replacement: mysql
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+- job_name: mysql-mr
+  scrape_interval: ENV_METRICS_RESOLUTION_MR
+  scrape_timeout: 1s
+  metrics_path: /metrics-mr
+  scheme: http
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - mysql:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - separator: ;
+    regex: (.*)
+    target_label: job
+    replacement: mysql
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+- job_name: mysql-lr
+  scrape_interval: ENV_METRICS_RESOLUTION_LR
+  scrape_timeout: 5s
+  metrics_path: /metrics-lr
+  scheme: http
+  consul_sd_configs:
+  - server: localhost:8500
+    datacenter: dc1
+    tag_separator: ','
+    scheme: http
+    services:
+    - mysql:metrics
+  basic_auth:
+    username: pmm
+    password: pmm
+  tls_config:
+    insecure_skip_verify: true
+  relabel_configs:
+  - separator: ;
+    regex: (.*)
+    target_label: job
+    replacement: mysql
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,alias_([-\w:\.]+),.*
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_consul_tags]
+    separator: ;
+    regex: .*,scheme_https,.*
+    target_label: __scheme__
+    replacement: https
+    action: replace
+- job_name: rds-mysql-hr
+  honor_labels: true
+  scrape_interval: ENV_METRICS_RESOLUTION_HR
+  scrape_timeout: 1s
+  metrics_path: /metrics-hr
+  relabel_configs:
+  - target_label: job
+    replacement: mysql
+- job_name: rds-mysql-mr
+  honor_labels: true
+  scrape_interval: ENV_METRICS_RESOLUTION_MR
+  scrape_timeout: 1s
+  metrics_path: /metrics-mr
+  relabel_configs:
+  - target_label: job
+    replacement: mysql
+- job_name: rds-mysql-lr
+  honor_labels: true
+  scrape_interval: ENV_METRICS_RESOLUTION_LR
+  scrape_timeout: 5s
+  metrics_path: /metrics-lr
+  relabel_configs:
+  - target_label: job
+    replacement: mysql
+- job_name: rds-basic
+  honor_labels: true
+  scrape_interval: 1m
+  scrape_timeout: 55s
+  metrics_path: /basic
+- job_name: rds-enhanced
+  honor_labels: true
+  scrape_interval: 10s
+  scrape_timeout: 9s
+  metrics_path: /enhanced

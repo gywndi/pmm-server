@@ -8,12 +8,13 @@ if [ -n "${ENABLE_DEBUG}" ]; then
     exec > >(tee -a /var/log/$(basename $0).log) 2>&1
 fi
 
+# Alertmanager
+sed -i "s|ENV_ALERT_WEB_HOOK|${ALERT_WEB_HOOK}|" /opt/alertmanager/config.yml
+
 # Prometheus
-if [[ ! "${METRICS_RESOLUTION:-1s}" =~ ^[1-5]s$ ]]; then
-    echo "METRICS_RESOLUTION takes only values from 1s to 5s."
-    exit 1
-fi
-sed -i "s/1s/${METRICS_RESOLUTION:-1s}/" /etc/prometheus.yml
+sed -i "s/ENV_METRICS_RESOLUTION_HR/${METRICS_RESOLUTION_HR:-1s}/" /etc/prometheus.yml
+sed -i "s/ENV_METRICS_RESOLUTION_MR/${METRICS_RESOLUTION_MR:-5s}/" /etc/prometheus.yml
+sed -i "s/ENV_METRICS_RESOLUTION_LR/${METRICS_RESOLUTION_LR:-60s}/" /etc/prometheus.yml
 sed -i "s/ENV_METRICS_RETENTION/${METRICS_RETENTION:-720h}/" /etc/supervisord.d/pmm.ini
 
 if [ -n "$METRICS_MEMORY" ]; then
